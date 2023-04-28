@@ -1,0 +1,680 @@
+<html>
+  <head>
+    <title>Linux Training</title>
+    <style type="text/css">
+
+    h1.page_title { text-align: center; }
+
+    ol.toc { list-style-type: upper-roman; }
+    ol.toc ol { list-style-type: upper-latin; }
+
+    table {
+      border-collapse: collapse;
+      border: 1px solid #ccc;
+    }
+
+    td, th { padding: 6px; }
+
+    tr:nth-child(even) { background-color: #eee; }
+
+    th {
+      color: #fff;
+      background-color: #3aa;
+    }
+
+    pre {
+      padding: 6px;
+      background-color: #eee;
+    }
+
+    hr {
+      border-top: 1px solid #ccc;
+      border-bottom: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    tt { font-size: 10pt; }
+
+    .toc_link {
+      background-color: #eee;
+      text-align: center;
+      font-size: 10pt;
+    }
+
+    </style>
+  </head>
+  <body>
+    <h1 class="page_title">Linux Training<br/>
+    <img src="linux-logo.png"/></h1>
+
+    <a name="toc"/>
+    <h2>Table of Contents</h2>
+    <ol class="toc">
+      <li><a href="#overview">Overview: What is Linux?</a></li>
+      <li><a href="#history">History of Linux</a></li>
+      <li><a href="#files">Files</a>
+        <ol>
+          <li><a href="#inode">Inode</a></li>
+          <li><a href="#permissions">File Permissions</a></li>
+        </ol>
+      </li>
+      <li><a href="#top_cmds">Top Commands</a></li>
+      <li><a href="#network">Network</a>
+        <ol>
+          <li><a href="#config_if">Configuring Network Interfaces</a></li>
+          <li><a href="#nm">NetworkManager</a></li>
+          <li><a href="#ports">The Most Common Ports</a></li>
+        </ol>
+      </li>
+      <li><a href="#"></a></li>
+      <li><a href="#"></a></li>
+      <li><a href="#"></a></li>
+      <li><a href="#"></a></li>
+      <li><a href="#"></a></li>
+      <li><a href="#"></a></li>
+      <li><a href="#"></a></li>
+    </ol>
+
+    <hr/>
+
+    <a name="overview"/>
+    <h2>Overview: What is Linux?</h2>
+    <p>Linux = the Kernel, not a complete operating system</p>
+    <p>GNU/Linux = GNU system + Linux kernel</p>
+    <p>GNU Project: objective was to produce a complete, free Unix-like system—GNU</p>
+    <p>Kernel space vs. user space</p>
+
+    <a name="kernel_arch"/>
+    <h3>Kernel architecture:</h3>
+    <ul>
+      <li>System call interface</li>
+      <li>Process management</li>
+      <li>Memory management</li>
+      <li>Virtual file system</li>
+      <li>Network stack</li>
+      <li>Device drivers</li>
+      <li>Architecture-dependent code</li>
+    </ul>
+
+    <a name="linux_components"/>
+    <h3>Components of a Linux System</h3>
+    <ul>
+      <li>Bootloader (GRUB, Syslinux, LILO)</li>
+      <li>Kernel—allocates system resources to other programs, a resource manager for memory,
+          processes, and hardware devices</li>
+      <li>Init system (systemd, SysV init, OpenRC, Runit)</li>
+      <li>Daemons/Services (rsyslog, netlabel, httpd)</li>
+      <li>Linux Security Modules (SELinux, AppArmor)</li>
+      <li>Applications (GNU tools, web browser, text editor)</li>
+      <li>Graphical server (X11, Wayland)</li>
+      <li>Desktop environment (GNOME, KDE, Cinnamon, MATE, Xfce, OpenBox)</li>
+      <li>Shell: sh, bash, ash, (t)csh, ksh, zsh, dash, fish</li>
+      <li>Terminal (emulator): gnome-terminal, konsole, xterm, rxvt, urxvt, eterm, Terminator</li>
+    </ul>
+
+    <a name="history"/>
+    <h2>History of Linux</h2>
+    <p>Originally called "Freax", the Linux kernel is the brainchild of Finnish-born software
+    engineer Linus Torvalds,
+    which he developed in 1991 while a student at the University of Helsinki;
+    however, the GNU/Linux operating system has evolved from many other projects,
+    notably the GNU Project from the Richard Stallman and the Free Software Foundation,
+    the Berkeley Software Distribution (BSD), and indeed UNIX itself.</p>
+    <p>UNIX (originally "UNICS") began as a follow-up to the failed MULTICS project at
+    AT&amp;T Bell Labs in 1969.  The principal developers of UNIX were Ken Thompson,
+    Dennis Ritchie (creator of the C programming language, Doug McIlroy, and Joe Ossanna.
+    Computer scientist and later professor Brian Kernighan was also an early contributer,
+    and is credited with the eventual spelling "UNIX".</p>
+
+    <p class="toc_link"><a href="#toc">[TOC]</a></p>
+
+    <a name="files"/>
+    <h2>Files</h2>
+    <p>UNIX principle: <b>Everything is a FILE</b>
+
+    <a name="inode"/>
+    <h3>Inode</h3>
+    <p>An inode is data structure that store information about a file.
+    Below is the actual C code that defines the inode data structure:</p>
+    <pre>
+struct inode {
+        struct hlist_node       i_hash;              /* hash list */
+        struct list_head        i_list;              /* list of inodes */
+        struct list_head        i_dentry;            /* list of dentries */
+        unsigned long           i_ino;               /* inode number */
+        atomic_t                i_count;             /* reference counter */
+        umode_t                 i_mode;              /* access permissions */
+        unsigned int            i_nlink;             /* number of hard links */
+        uid_t                   i_uid;               /* user id of owner */
+        gid_t                   i_gid;               /* group id of owner */
+        kdev_t                  i_rdev;              /* real device node */
+        loff_t                  i_size;              /* file size in bytes */
+        struct timespec         i_atime;             /* last access time */
+        struct timespec         i_mtime;             /* last modify time */
+        struct timespec         i_ctime;             /* last change time */
+        unsigned int            i_blkbits;           /* block size in bits */
+        unsigned long           i_blksize;           /* block size in bytes */
+        unsigned long           i_version;           /* version number */
+        unsigned long           i_blocks;            /* file size in blocks */
+        unsigned short          i_bytes;             /* bytes consumed */
+        spinlock_t              i_lock;              /* spinlock */
+        struct rw_semaphore     i_alloc_sem;         /* nests inside of i_sem */
+        struct semaphore        i_sem;               /* inode semaphore */
+        struct inode_operations *i_op;               /* inode ops table */
+        struct file_operations  *i_fop;              /* default inode ops */
+        struct super_block      *i_sb;               /* associated superblock */
+        struct file_lock        *i_flock;            /* file lock list */
+        struct address_space    *i_mapping;          /* associated mapping */
+        struct address_space    i_data;              /* mapping for device */
+        struct dquot            *i_dquot[MAXQUOTAS]; /* disk quotas for inode */
+        struct list_head        i_devices;           /* list of block devices */
+        struct pipe_inode_info  *i_pipe;             /* pipe information */
+        struct block_device     *i_bdev;             /* block device driver */
+        unsigned long           i_dnotify_mask;      /* directory notify mask */
+        struct dnotify_struct   *i_dnotify;          /* dnotify */
+        unsigned long           i_state;             /* state flags */
+        unsigned long           dirtied_when;        /* first dirtying time */
+        unsigned int            i_flags;             /* filesystem flags */
+        unsigned char           i_sock;              /* is this a socket? */
+        atomic_t                i_writecount;        /* count of writers */
+        void                    *i_security;         /* security module */
+        __u32                   i_generation;        /* inode version number */
+        union {
+                void            *generic_ip;         /* filesystem-specific info */
+        } u;
+};</pre>
+
+    <p>Notable for sysadmins among the contents of the inode are the follow:</p>
+    <ul>
+      <li>Metadata
+        <ul>
+          <li>Inode number</li>
+          <li>Mode (access permissions)</li>
+          <li>User ID of the owner</li>
+          <li>Group ID of the group owner</li>
+          <li>File size</li>
+          <li>Access time</li>
+          <li>Modification time</li>
+          <li>Attribute change time</li>
+          <li>Inode filesystem flags, e.g. immutable</li>
+        </ul>
+      </li>
+      <li>Pointers to data blocks</li>
+    </ul>
+
+    <a name="permissions"/>
+    <h3>File Permissions</h3>
+    <p>There are three primary file permissions in Linux:</p>
+    <table>
+      <tr>
+        <th>Permission</th>
+        <th>Symbol</th>
+        <th>Octal value</th>
+      </tr>
+      <tr>
+        <td>Read</td>
+        <td>r</td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td>Write</td>
+        <td>w</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>Execute</td>
+        <td>x</td>
+        <td>1</td>
+      </tr>
+    </table>   
+    <p>Examples:</p>
+    <ul>
+      <li>5 = read (4) + execute (1)</li>
+      <li>6 = read (4) + write (2)</li>
+      <li>7 = read (4) + write (2) + execute (1)</li>
+    </ul>
+
+    <p class="toc_link"><a href="#toc">[TOC]</a></p>
+
+    <a name="top_cmds"/>
+    <h2>Top Commands</h2>
+    <table>
+      <tr>
+        <th>Command</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>awk</td>
+        <td>Pattern scanning and processing language/utility</td>
+      </tr>
+      <tr>
+        <td>cat</td>
+        <td>Concatenate the contents to the console buffer (print contents of file)</td>
+      </tr>
+      <tr>
+        <td>cd</td>
+        <td>Change directory</td>
+      </tr>
+      <tr>
+        <td>chmod</td>
+        <td>Change mode (read/write/execute permissions)</td>
+      </tr>
+      <tr>
+        <td>chown</td>
+        <td>Change owner</td>
+      </tr>
+      <tr>
+        <td>cp</td>
+        <td>Copy files/directories</td>
+      </tr>
+      <tr>
+        <td>df</td>
+        <td>Display disk filesystem information</td>
+      </tr>
+      <tr>
+        <td>diff</td>
+        <td>Show differences between files</td>
+      </tr>
+      <tr>
+        <td>echo</td>
+        <td>Print text to the screen</td>
+      </tr>
+      <tr>
+        <td>find</td>
+        <td>Find files/directories that match criteria</td>
+      </tr>
+      <tr>
+        <td>grep</td>
+        <td>Global Regular Express—print lines that match patterns</td>
+      </tr>
+      <tr>
+        <td>head</td>
+        <td>Print lines of a file starting at the top</td>
+      </tr>
+      <tr>
+        <td>kill</td>
+        <td>Kill active processes</td>
+      </tr>
+      <tr>
+        <td>less</td>
+        <td>Display and paginate output text</td>
+      </tr>
+      <tr>
+        <td>ln</td>
+        <td>Create link</td>
+      </tr>
+      <tr>
+        <td>ls</td>
+        <td>List files</td>
+      </tr>
+      <tr>
+        <td>man</td>
+        <td>Display the manual page for a command or file</td>
+      </tr>
+      <tr>
+        <td>mkdir</td>
+        <td>Make directory</td>
+      </tr>
+      <tr>
+        <td>mount</td>
+        <td>Mount a block device or display mounted devices</td>
+      </tr>
+      <tr>
+        <td>mv</td>
+        <td>Move/rename file/directory</td>
+      </tr>
+      <tr>
+        <td>passwd</td>
+        <td>Set or change a user’s password</td>
+      </tr>
+      <tr>
+        <td>ps</td>
+        <td>List processes</td>
+      </tr>
+      <tr>
+        <td>pwd</td>
+        <td>Print working directory</td>
+      </tr>
+      <tr>
+        <td>rm</td>
+        <td>Remove file</td>
+      </tr>
+      <tr>
+        <td>rmdir</td>
+        <td>Remove (empty) directory</td>
+      </tr>
+      <tr>
+        <td>sed</td>
+        <td>Stream Editor—modify output text or files based on patterns</td>
+      </tr>
+      <tr>
+        <td>sort</td>
+        <td>Sort a list of items</td>
+      </tr>
+      <tr>
+        <td>sudo</td>
+        <td>Privilege escalation as defined for user</td>
+      </tr>
+      <tr>
+        <td>tail</td>
+        <td>Print lines of a file starting at the bottom</td>
+      </tr>
+      <tr>
+        <td>tar</td>
+        <td>Tape Archive—compress files/directories into “tarball” archive</td>
+      </tr>
+      <tr>
+        <td>top</td>
+        <td>Display processes and resource consumption</td>
+      </tr>
+      <tr>
+        <td>touch</td>
+        <td>Update access time on a file; if it does not exist, create it</td>
+      </tr>
+      <tr>
+        <td>uname</td>
+        <td>Print basic OS information</td>
+      </tr>
+      <tr>
+        <td>useradd</td>
+        <td>Add user account</td>
+      </tr>
+      <tr>
+        <td>usermod</td>
+        <td>Modify user account</td>
+      </tr>
+      <tr>
+        <td>whoami</td>
+        <td>Print current user</td>
+      </tr>
+    </table>
+
+    <p class="toc_link"><a href="#toc">[TOC]</a></p>
+
+    <a name="network"/>
+    <h2>Network</h2>
+
+    <a name="config_if"/>
+    <h3>Configuring Network Interfaces</h3>
+    <p>In order to connect to networks, you must first configure the network hardware interfaces,
+    also called devices.</p>
+    <p>Network interfaces are configured with network scripts located in <tt>/etc/sysconfig/network-scripts/</tt>
+    and begin with <tt>ifcfg-</tt> followed by the name of the device, e.g., <tt>ifcfg-eno1</tt>.</p>
+    <p>The most common parameters are the following:</p>
+    <table>
+      <tr>
+        <th>Parameter</th>
+        <th>Description</th>
+        <th>Example Values</th>
+      </tr>
+      <tr>
+        <td>NAME</td>
+        <td>The name of the connection</td>
+        <td><i>eno1</i> (usually the same as the device)</td>
+      </tr>
+      <tr>
+        <td>DEVICE</td>
+        <td>The device/interface to be configured</td>
+        <td><i>eno1</i></td>
+      </tr>
+      <tr>
+        <td>TYPE</td>
+        <td>Type of network connection</td>
+        <td>Ethernet|Bridge</td>
+      <tr>
+        <td>BOOTPROTO</td>
+        <td>Boot protocol, how to obtain an address</td>
+        <td>none|dhcp|bootp</td>
+      </tr>
+      <tr>
+        <td>IPADDR</td>
+        <td>Internet protocol address</td>
+        <td><i>192.168.0.1</i></td>
+      </tr>
+      <tr>
+        <td>HWADDR</td>
+        <td>Hardware/MAC address of the interface</td>
+        <td><i>11:22:33:44:55:66</i></td>
+      </tr>
+      <tr>
+        <td>NETMASK</td>
+        <td>Network mask</td>
+        <td><i>255.255.255.0</i></td>
+      </tr>
+      <tr>
+        <td>PREFIX</td>
+        <td>CIDR prefix, an alternative way to specify the network mask</td>
+        <td><i>24</i></td>
+      </tr>
+      <tr>
+        <td>GATEWAY</td>
+        <td>Network gateway (not required)</td>
+        <td><i>192.168.0.254</i></td>
+      </tr>
+      <tr>
+        <td>BROADCAST</td>
+        <td>Broadcast domain for network</td>
+        <td><i>192.168.0.255</i></td>
+      </tr>
+      <tr>
+        <td>ONBOOT</td>
+        <td>Whether to activate the interface automatically at boot time (or when network service/manager
+            is started)</td>
+        <td>yes|no</td>
+      <tr>
+        <td>DEFROUTE</td>
+        <td>Whether this interface is to be used as the default gateway/route</td>
+        <td>yes|no</td>
+      </tr>
+      <tr>
+        <td>NM_CONTROLLED</td>
+        <td>Whether the configuration for this interface should be controlled by NetworkManager</td>
+        <td>yes|no</td>
+      </tr>
+    </table>
+
+    <p>While these parameters are common, they are not all required.  The minimal parameters
+    for most cases are NAME, DEVICE, BOOTPROTO, IPADDR, NETMASK or PREFIX</p>
+
+    <p>Consider the following examples for typical situations.</p>
+    <p>A static/manual configuration:</p>
+    <pre>
+TYPE=Ethernet
+NAME=eno1
+DEVICE=eno1
+BOOTPROTO=none
+ONBOOT=yes
+IPADDR=192.168.0.1
+NETMASK=255.255.255.0
+GATEWAY=192.168.0.254</pre>
+
+    <p>A DHCP/automatic configuration:</p>
+    <pre>
+TYPE=Ethernet
+NAME=eno1
+DEVICE=eno1
+BOOTPROTO=dhcp
+ONBOOT=yes</pre>
+
+    <a name="nm"/>
+    <h3>NetworkManager</h3>
+    <p>Whereas previous versions of Red Hat Enterprise Linux prior to RHEL 7 used network scripts
+    for configuring network interfaces, RHEL 7 and later primary use the NetworkManager service
+    and its utilities.  RHEL 7 and 8 use NetworkManager as means of writing network scripts,
+    but this is changing in upstream distros.
+    In fact, RHEL 9 no longer even uses network scripts.</p>
+    <p>NetworkManager comes with several utilities for configuring the network,
+    such as <tt>nmtui</tt>, the NetworkManager text-based user interface, which uses text menus;
+    however, the most useful tool in terms of power, efficiency, and scriptability, is
+    <tt>nmcli</tt>, the NetworkManager command line interface utility.</p>
+    <p></p>
+
+    <a name="ports"/>
+    <h3>The Most Common Ports</h3>
+    <p>For connectivity to network services, the daemon binds to a port.
+    This allow for multiple services to be accessible on the same address.
+    Here are some of the most common ports that should be memorized:</p>
+    
+    <table>
+      <tr>
+        <th>Port</th>
+        <th>Protocol</th>
+        <th>Usage</th>
+      </tr>
+      <tr>
+        <td>21</td>
+        <td>TCP</td>
+        <td>File Transport Protocol (FTP) Command Control</td>
+      </tr>
+      <tr>
+        <td>22</td>
+        <td>TCP</td>
+        <td>Secure Shell (SSH)</td>
+      </tr>
+      <tr>
+        <td>23</td>
+        <td>TCP</td>
+        <td>Telnet - Remote login service, unencrypted text messages</td>
+      </tr>
+      <tr>
+        <td>25</td>
+        <td>TCP</td>
+        <td>Simple Mail Transfer Protocol (SMTP) E-mail Routing</td>
+      </tr>
+      <tr>
+        <td>53</td>
+        <td>TCP/UDP</td>
+        <td>Domain Name System (DNS) service</td>
+      </tr>
+      <tr>
+        <td>67</td>
+        <td>UDP</td>
+        <td>Dynamic Host Configuration Protocol (DHCP)</td>
+      </tr>
+      <tr>
+        <td>69</td>
+        <td>UDP</td>
+        <td>Trivial File Transport Protocol (TFTP)</td>
+      </tr>
+      <tr>
+        <td>80</td>
+        <td>TCP</td>
+        <td>Hypertext Transfer Protocol (HTTP)</td>
+      </tr>
+      <tr>
+        <td>88</td>
+        <td>TCP/UDP</td>
+        <td>Kerberos authentication</td>
+      </tr>
+      <tr>
+        <td>110</td>
+        <td>TCP</td>
+        <td>Post Office Protocol (POP3)</td>
+      </tr>
+      <tr>
+        <td>123</td>
+        <td>UDP</td>
+        <td>Network Time Protocol (NTP)</td>
+      </tr>
+      <tr>
+        <td>135</td>
+        <td>TCP</td>
+        <td>End Point Mapper (DCE/RPC Locator Service)</td>
+      </tr>
+      <tr>
+        <td>137</td>
+        <td>UDP</td>
+        <td>NetBIOS Name Service</td>
+      </tr>
+      <tr>
+        <td>138</td>
+        <td>UDP</td>
+        <td>NetBIOS Datagram</td>
+      </tr>
+      <tr>
+        <td>139</td>
+        <td>TCP</td>
+        <td>NetBIOS Session</td>
+      </tr>
+      <tr>
+        <td>143</td>
+        <td>TCP</td>
+        <td>Internet Message Access Protocol (IMAP) Management of Digital Mail</td>
+      </tr>
+      <tr>
+        <td>389</td>
+        <td>TCP</td>
+        <td>Lightweight Directory Access Protocol (LDAP)</td>
+      </tr>
+      <tr>
+        <td>443</td>
+        <td>TCP</td>
+        <td>HTTP over TLS/SSL (HTTPS)</td>
+      </tr>
+      <tr>
+        <td>445</td>
+        <td>TCP</td>
+        <td>SMB over TCP, CIFS</td>
+      </tr>
+      <tr>
+        <td>464</td>
+        <td>TCP/UDP</td>
+        <td>Kerberos kpasswd (change/set password)</td>
+      </tr>
+      <tr>
+        <td>514</td>
+        <td>UDP</td>
+        <td>Syslog</td>
+      </tr>
+      <tr>
+        <td>636</td>
+        <td>TCP</td>
+        <td>Lightweight Directory Access Protocol over TLS/SSL (LDAPS)</td>
+      </tr>
+      <tr>
+        <td>993</td>
+        <td>TCP</td>
+        <td>Internet Message Access Protocol over TLS/SSL (IMAPS)</td>
+      </tr>
+      <tr>
+        <td>995</td>
+        <td>TCP</td>
+        <td>Post Office Protocol over TLS/SSL (POP3S)</td>
+      </tr>
+      <tr>
+        <td>2049</td>
+        <td>TCP</td>
+        <td>Network File System (NFS)</td>
+      </tr>
+      <tr>
+        <td>3260</td>
+        <td>TCP/UDP</td>
+        <td>Internet Small Computer Systems Interface (iSCSI)</td>
+      </tr>
+      <tr>
+        <td>5432</td>
+        <td>TCP</td>
+        <td>PostgreSQL database</td>
+      </tr>
+      <tr>
+        <td>5900+</td>
+        <td>TCP</td>
+        <td>Virtual Network Computing (VNC) Remote Frame Buffer RFB protocol</td>
+      </tr>
+      <tr>
+        <td>8080</td>
+        <td>TCP</td>
+        <td>Alternate HTTP, Apache Tomcat</td>
+      </tr>
+      <tr>
+        <td>8443</td>
+        <td>TCP</td>
+        <td>Alternate HTTPS, Apache Tomcat TLS/SSL</td>
+      </tr>
+    </table>
+
+    <p class="toc_link"><a href="#toc">[TOC]</a></p>
+
+  </body>
+</html>
