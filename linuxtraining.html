@@ -497,19 +497,25 @@ DEVICE=eno1
 BOOTPROTO=dhcp
 ONBOOT=yes</pre>
 
-    <a name="nm"/>
-    <h3>NetworkManager</h3>
+<h3>NetworkManager</h3>
     <p>Whereas previous versions of Red Hat Enterprise Linux prior to RHEL 7 used network scripts
     for configuring network interfaces, RHEL 7 and later primary use the NetworkManager service
     and its utilities.  RHEL 7 and 8 use NetworkManager as means of writing network scripts,
     but this is changing in upstream distros.
     In fact, RHEL 9 no longer even uses network scripts.</p>
+    <p>NetworkManager uses the concept of <i>connections</i> for interface configurations.
+    The connection has a name that may be distinct from the device name, although it is
+    best practice to use the same name as the device for the sake of clarity.</p>
     <p>NetworkManager comes with several utilities for configuring the network,
     such as <tt>nmtui</tt>, the NetworkManager text-based user interface, which uses text menus;
     however, the most useful tool in terms of power, efficiency, and scriptability, is
     <tt>nmcli</tt>, the NetworkManager command line interface utility.</p>
-    <p></p>
+    <h4><tt>nmcli</tt> Syntax</h4>    
+    <p>The following syntax is used to add a new interface connection for device eno1 using a static configuration:</p>
+    <pre>
+nmcli con add type ethernet con-name eno1 ifname eno1 ipv4.method manual ipv4.address 192.168.0.1/24 ipv4.gateway 192.168.0.254 autoconnect yes</pre>
 
+    
     <a name="ports"/>
     <h3>The Most Common Ports</h3>
     <p>For connectivity to network services, the daemon binds to a port.
